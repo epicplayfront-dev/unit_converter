@@ -1,22 +1,26 @@
-use std::io;
+use dialoguer::{Input, Select};
+
 fn main() {
     println!("--------------simple rust unit converter---------------");
     loop {
-        println!("\nSelect Catagory...");
-        println!("1. Length (Meters <--> Kilometers <--> Miles)");
-        println!("2. Temparature (Celcius <--> Farenheit");
-        println!("3. Exit");
+        //Converter catagories
+        let catagories = [
+            "Length (Meters <--> Kilometers <--> Miles)",
+            "Temparature (Celcius <--> Farenheit",
+            "Exit"
+        ];
+        //Prompt user for converter choice
+        let catagory = Select::new()
+            .with_prompt("Select a conversion or exit")
+            .items(&catagories)
+            .default(0)
+            .interact()
+            .unwrap();
 
-        let mut choice = String::new();
-        io::stdin().read_line(&mut choice).expect("Failed to read line.");
-        let choice: u32 = match choice.trim().parse() {
-            Ok(num) => num,
-            Err(_) => continue,
-        };
-        match choice {
-            1 => {length_converter()}
-            2 => {temparature_converter()}
-            3 => {break}
+        match catagory {
+            0 => {length_converter()}
+            1 => {temparature_converter()}
+            2 => {break}
             _ => println!("Invalid choice, please try again")
         }
     }
@@ -24,15 +28,28 @@ fn main() {
 
 
 fn length_converter() {
-    println!("Enter a value to convert...");
-    let value : f64 = read_f64();
-    println!("Select input unit: 1. Meters 2. Kilometers 3. Miles");
-    let input_unit = read_u32();
+    //prompt user to input a value to convert
+    let value : f64 = Input::new()
+        .with_prompt("Enter a length to convert")
+        .interact_text()
+        .unwrap();
+    
+    let units = [
+        "Meters", 
+        "Kilometers", 
+        "Miles",
+    ];
+    let unit = Select::new()
+        .with_prompt("What unit is the value?")
+        .items(&units)
+        .default(0)
+        .interact()
+        .unwrap();
 
-    let meters = match input_unit {
-        1 => value,
-        2 => value * 1000.0,
-        3 => value * 1609.34,
+    let meters = match unit {
+        0 => value,
+        1 => value * 1000.0,
+        2 => value * 1609.34,
         _ => {println!("Invalid input..."); return;}
     };
 
@@ -43,34 +60,30 @@ fn length_converter() {
 }
 
 fn temparature_converter() {
-    println!("Enter temparature value...");
-    let value : f64 = read_f64();
-    println!("Select input scale: 1. Celcius 2. Farenheit ");
-    let scale = read_u32();
+    let value : f64 = Input::new()
+        .with_prompt("What is the temparature?")
+        .interact_text()
+        .unwrap();
+
+    let scales = [
+        "Celcius",
+        "Farenheit",
+    ];
+    let scale = Select::new()
+        .with_prompt("What scale is the temparature?")
+        .items(&scales)
+        .default(0)
+        .interact()
+        .unwrap();
 
     match scale {
-        1 => {
+        0 => {
             let f = (value * 9.0 / 5.0) + 32.0;
             println!("{:.2} C is {:.2} F", value, f);
         },
-        2 => {
+        _ => {
             let c = (value - 32.0) * 5.0 / 9.0;
             println!("{:.2} C is {:.2} F", c, value);
         },
-        _ => {println!("Invalid scale...");}
     };
-}
-
-
-//Helper functions for inputs
-fn read_f64() -> f64 {
-    let mut input = String::new();
-    io::stdin().read_line(&mut input).expect("Read error");
-    input.trim().parse().unwrap_or(0.0)
-}
-
-fn read_u32() -> u32 {
-    let mut input = String::new();
-    io::stdin().read_line(&mut input).expect("Read error");
-    input.trim().parse().unwrap_or(0)
 }
